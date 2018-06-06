@@ -1,0 +1,252 @@
+diff -Naur /home/thinkpad/joy3/sleuth_pkg/sleuth/fingerprint.py /home/thinkpad/joy/sleuth_pkg/sleuth/fingerprint.py
+--- /home/thinkpad/joy3/sleuth_pkg/sleuth/fingerprint.py	2018-06-05 04:34:48.000000000 +0800
++++ /home/thinkpad/joy/sleuth_pkg/sleuth/fingerprint.py	2018-06-06 20:44:28.320600245 +0800
+@@ -35,7 +35,7 @@
+ """
+ import os
+ import json
+-from sleuth import SleuthTemplateDict
++from .sleuth import SleuthTemplateDict
+ 
+ class fingerprinter(object):
+     fingerprint_dict = {
+diff -Naur /home/thinkpad/joy3/sleuth_pkg/sleuth/inferences.py /home/thinkpad/joy/sleuth_pkg/sleuth/inferences.py
+--- /home/thinkpad/joy3/sleuth_pkg/sleuth/inferences.py	2018-06-05 04:34:48.000000000 +0800
++++ /home/thinkpad/joy/sleuth_pkg/sleuth/inferences.py	2018-06-06 19:50:50.000000000 +0800
+@@ -54,7 +54,7 @@
+             tmp = json.loads(line)
+             fpvalue = pickle.dumps(tmp['fingerprint']['tls'])
+             if fpvalue in tls_fp_dict:
+-                print "warning: duplicate tls fingerprint in line " + str(counter + 1) + " of file " + tls_fp_file
++                print("warning: duplicate tls fingerprint in line " + str(counter + 1) + " of file " + tls_fp_file)
+             tls_fp_dict[fpvalue] = tmp['label']
+ 
+ 
+diff -Naur /home/thinkpad/joy3/sleuth_pkg/sleuth/__init__.py /home/thinkpad/joy/sleuth_pkg/sleuth/__init__.py
+--- /home/thinkpad/joy3/sleuth_pkg/sleuth/__init__.py	2018-06-05 04:34:48.000000000 +0800
++++ /home/thinkpad/joy/sleuth_pkg/sleuth/__init__.py	2018-06-06 20:44:19.748600567 +0800
+@@ -1,6 +1,6 @@
+-from sleuth import *
+-from api_joy import *
+-from enrich_tls import enrich_tls
+-from fingerprint import *
+-from inferences import *
++from .sleuth import *
++from .api_joy import *
++from .enrich_tls import enrich_tls
++from .fingerprint import *
++from .inferences import *
+ 
+diff -Naur /home/thinkpad/joy3/sleuth_pkg/sleuth/sleuth.py /home/thinkpad/joy/sleuth_pkg/sleuth/sleuth.py
+--- /home/thinkpad/joy3/sleuth_pkg/sleuth/sleuth.py	2018-06-05 04:34:48.000000000 +0800
++++ /home/thinkpad/joy/sleuth_pkg/sleuth/sleuth.py	2018-06-06 19:53:21.000000000 +0800
+@@ -244,7 +244,7 @@
+ 
+             for d in output:
+                 json.dump(d, sys.stdout, indent=self.indent)
+-                print ""
++                print("")
+ 
+             raise StopIteration
+ 
+@@ -277,7 +277,7 @@
+             for obj in self.obj_set:
+                 try:
+                     json.dump(obj, sys.stdout, indent=self.indent)
+-                    print ""
++                    print("")
+                 except IOError:
+                     # Broken pipe, exit loop
+                     break
+@@ -301,7 +301,7 @@
+ 
+     def post_process(self, proc=None):
+         if self.context:
+-            print self.context
++            print(self.context)
+ 
+         for k, v in self.dict.items():
+             v.post_process(copy.deepcopy(proc))
+@@ -348,7 +348,7 @@
+         # NOTE: sum_over might interfere with --dist
+         d["sum_over"] = self.total
+         json.dump(d, sys.stdout, indent=self.indent)
+-        print ""
++        print("")
+ 
+ 
+ class DictStreamDistributionProcessor(DictStreamProcessor):
+@@ -379,7 +379,7 @@
+ 
+         for d in output:
+             json.dump(d, sys.stdout, indent=self.indent)
+-            print ""
++            print("")
+ 
+ 
+ """
+@@ -413,7 +413,7 @@
+         if needArg:
+             t += "None"
+         t += '}'
+-        #print "t: " + t
++        #print("t: " + t)
+         return eval(t)
+ 
+     def copy_selected_elements(self, tmplDict, obj):
+@@ -543,9 +543,9 @@
+             self.matchAll = True
+ 
+     def eval(self, flow):
+-        # print 'flow: ' + str(flow)
+-        # print 'op: ' + str(self.op)
+-        # print 'arg: ' + str(self.arg)
++        # print('flow: ' + str(flow))
++        # print('op: ' + str(self.op))
++        # print('arg: ' + str(self.arg))
+ 
+         # If flow is list, match any element in it
+         if isinstance(flow, list):
+@@ -561,7 +561,7 @@
+                             listMatch = True
+             return listMatch
+         elif isinstance(flow, dict):
+-            # print 'dict flow: ' + str(flow)
++            # print('dict flow: ' + str(flow))
+             x = flow.values()[0]
+             return self.eval(x)
+ 
+@@ -571,9 +571,9 @@
+             elif isinstance(self.arg, int):
+                 return self.arg == flow
+             else:
+-                # print '------------------'
+-                # print 'flow: ' + str(flow)
+-                # print 'arg:  ' + str(self.arg)
++                # print('------------------')
++                # print('flow: ' + str(flow))
++                # print('arg:  ' + str(self.arg))
+                 return fnmatch.fnmatch(flow, self.arg)
+         elif self.op == '~':
+             if self.arg == '*':
+diff -Naur /home/thinkpad/joy3/test/obsidianbox/__init__.py /home/thinkpad/joy/test/obsidianbox/__init__.py
+--- /home/thinkpad/joy3/test/obsidianbox/__init__.py	2018-06-05 04:34:48.000000000 +0800
++++ /home/thinkpad/joy/test/obsidianbox/__init__.py	2018-06-06 21:51:17.737143029 +0800
+@@ -1,3 +1,3 @@
+-from test_general import main_general
+-from test_tls import main_tls
+-from test_ipfix import main_ipfix
++from .test_general import main_general
++from .test_tls import main_tls
++from .test_ipfix import main_ipfix
+diff -Naur /home/thinkpad/joy3/test/obsidianbox/test_general.py /home/thinkpad/joy/test/obsidianbox/test_general.py
+--- /home/thinkpad/joy3/test/obsidianbox/test_general.py	2018-06-05 04:34:48.000000000 +0800
++++ /home/thinkpad/joy/test/obsidianbox/test_general.py	2018-06-06 22:20:12.621075476 +0800
+@@ -95,7 +95,7 @@
+                 with gzip.open(self.tmp_output, 'r') as f:
+                     for line in f:
+                         try:
+-                            json.loads(line)
++                            json.loads(line.decode())
+                         except ValueError as e:
+                             logger.error("Invalid JSON object, see file %s", self.tmp_output)
+                             raise e
+@@ -103,7 +103,7 @@
+                 with bz2.BZ2File(self.tmp_output, 'r') as f:
+                     for line in f:
+                         try:
+-                            json.loads(line)
++                            json.loads(line.decode())
+                         except ValueError as e:
+                             logger.error("Invalid JSON object, see file %s", self.tmp_output)
+                             raise e
+@@ -111,7 +111,7 @@
+                 with open(self.tmp_output, 'r') as f:
+                     for line in f:
+                         try:
+-                            json.loads(line)
++                            json.loads(line.decode())
+                         except ValueError as e:
+                             logger.error("Invalid JSON object, see file %s", self.tmp_output)
+                             raise e
+diff -Naur /home/thinkpad/joy3/test/obsidianbox/test_ipfix.py /home/thinkpad/joy/test/obsidianbox/test_ipfix.py
+--- /home/thinkpad/joy3/test/obsidianbox/test_ipfix.py	2018-06-05 04:34:48.000000000 +0800
++++ /home/thinkpad/joy/test/obsidianbox/test_ipfix.py	2018-06-06 22:22:47.773069435 +0800
+@@ -68,7 +68,7 @@
+         Delete any existing temporary files.
+         :return:
+         """
+-        for key, f in self.tmp_outputs.iteritems():
++        for key, f in self.tmp_outputs.items():
+             if os.path.isfile(f):
+                 os.remove(f)
+ 
+diff -Naur /home/thinkpad/joy3/test/obsidianbox/test_tls.py /home/thinkpad/joy/test/obsidianbox/test_tls.py
+--- /home/thinkpad/joy3/test/obsidianbox/test_tls.py	2018-06-05 04:34:48.000000000 +0800
++++ /home/thinkpad/joy/test/obsidianbox/test_tls.py	2018-06-06 22:24:58.445064347 +0800
+@@ -128,12 +128,12 @@
+         Delete any existing temporary files.
+         :return:
+         """
+-        for key, f in self.tmp_outputs.iteritems():
++        for key, f in self.tmp_outputs.items():
+             if os.path.isfile(f):
+                 os.remove(f)
+ 
+     def _load_baseline(self):
+-        for version, flows in self.base_flows.iteritems():
++        for version, flows in self.base_flows.items():
+             pattern = self.paths['baseline'] + '/*base-' + version + '.json.gz'
+             base_files = glob.glob(pattern)
+ 
+@@ -172,7 +172,7 @@
+                             continue
+ 
+     def _run_tls(self):
+-        for version, flows in self.new_flows.iteritems():
++        for version, flows in self.new_flows.items():
+             pcap = os.path.abspath(os.path.join(self.paths['pcap'], version + '.pcap'))
+             proc = subprocess.Popen([self.paths['exec'],
+                                     'output=' + self.tmp_outputs[version], 'tls=1', pcap])
+@@ -219,7 +219,7 @@
+         self._run_tls()
+ 
+         # Compare the 2 datasets
+-        for version, tls_flows in self.new_flows.iteritems():
++        for version, tls_flows in self.new_flows.items():
+             # Operate on 1 TLS version at a time...
+             for flow in tls_flows:
+                 corrupt = True
+diff -Naur /home/thinkpad/joy3/test/obsidianbox/utils.py /home/thinkpad/joy/test/obsidianbox/utils.py
+--- /home/thinkpad/joy3/test/obsidianbox/utils.py	2018-06-05 04:34:48.000000000 +0800
++++ /home/thinkpad/joy/test/obsidianbox/utils.py	2018-06-06 22:14:28.425088879 +0800
+@@ -77,23 +77,23 @@
+         self.filename = filename
+ 
+     def is_gz(self):
+-        magic = "\x1f\x8b\x08"
++        magic = b"\x1f\x8b\x08"
+ 
+-        with open(self.filename) as f:
++        with open(self.filename, 'rb') as f:
+             data = f.read(len(magic))
+ 
+-            if data.startswith(magic):
++            if data == magic: #data.startswith(magic):
+                 return True
+ 
+         return False
+ 
+     def is_bz2(self):
+-        magic = "\x42\x5a\x68"
++        magic = b"\x42\x5a\x68"
+ 
+-        with open(self.filename) as f:
++        with open(self.filename, 'rb') as f:
+             data = f.read(len(magic))
+ 
+-            if data.startswith(magic):
++            if data == maigc: #data.startswith(magic):
+                 return True
+ 
+         return False
